@@ -42,18 +42,19 @@ export default function Login() {
     if (checking) return null;
 
     return (
-        <div className="h-screen flex items-center justify-center">
-            <form onSubmit={handleSubmit} className="w-72 flex flex-col gap-4">
-                <h1 className="text-center text-lg font-semibold text-[var(--foreground)] tracking-tight mb-2">
-                    cosmos
-                </h1>
+        <div className="h-screen flex items-center justify-center bg-[var(--background)]">
+            <form onSubmit={handleSubmit} className="w-72 flex flex-col gap-5 p-8">
+                <div className="text-center mb-4">
+                    <h1 className="text-3xl font-semibold text-[var(--foreground)] tracking-tight">Noir</h1>
+                    <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mt-1">Admin Access</p>
+                </div>
 
                 <input
                     type="text"
                     placeholder="Username"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-[var(--border)] rounded-lg bg-white outline-none focus:border-[var(--foreground)] transition-colors"
+                    className="w-full px-4 py-3 text-sm border border-[var(--border)] rounded-xl bg-white/50 outline-none focus:border-[var(--foreground)] focus:bg-white transition-all placeholder:text-[var(--muted)]"
                     autoFocus
                 />
 
@@ -62,19 +63,19 @@ export default function Login() {
                     placeholder="Password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-[var(--border)] rounded-lg bg-white outline-none focus:border-[var(--foreground)] transition-colors"
+                    className="w-full px-4 py-3 text-sm border border-[var(--border)] rounded-xl bg-white/50 outline-none focus:border-[var(--foreground)] focus:bg-white transition-all placeholder:text-[var(--muted)]"
                 />
 
                 {error && (
-                    <p className="text-xs text-red-500 text-center">{error}</p>
+                    <p className="text-xs text-red-500 text-center font-medium bg-red-50 py-2 rounded-lg">{error}</p>
                 )}
 
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 text-sm font-medium text-white bg-[var(--foreground)] rounded-lg hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                    className="w-full py-3 text-sm font-medium text-white bg-[var(--foreground)] rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
-                    {loading ? '...' : 'Enter'}
+                    {loading ? 'Authenticating...' : 'Sign In'}
                 </button>
             </form>
         </div>

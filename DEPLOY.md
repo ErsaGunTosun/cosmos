@@ -127,6 +127,18 @@ CREATE TABLE IF NOT EXISTS profile (
 INSERT INTO profile (id, name, username, bio) 
 VALUES (1, 'Müge', 'faithme', 'Photographer based in Istanbul') 
 ON CONFLICT DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS admins (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    display_name TEXT
+);
+
+INSERT INTO admins (username, password_hash, display_name)
+VALUES ('admin', '$2b$10$MseGFHfgL3/JpLQZYNaxMedqpwJVV6.y69bG9wra7yBEo.RmUxIeu', 'Admin')
+ON CONFLICT DO NOTHING;
+
 "
 ```
 
