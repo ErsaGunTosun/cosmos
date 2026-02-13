@@ -1,0 +1,140 @@
+[
+    {
+        "id": 1,
+        "src": "/uploads/thumbnails/SAM_0530.JPG",
+        "cluster": "Portraits",
+        "location": "Istanbul"
+    },
+    {
+        "id": 2,
+        "src": "/uploads/thumbnails/SAM_0220.JPG",
+        "cluster": "Streets",
+        "location": "Paris"
+    },
+    {
+        "id": 3,
+        "src": "/uploads/thumbnails/SAM_0219.JPG",
+        "cluster": "Portraits",
+        "location": "Berlin"
+    },
+    {
+        "id": 4,
+        "src": "/uploads/thumbnails/SAM_0221.JPG",
+        "cluster": "Streets",
+        "location": "Tokyo"
+    },
+    {
+        "id": 5,
+        "src": "/uploads/thumbnails/SAM_0530.JPG",
+        "cluster": "Nature",
+        "location": "Cappadocia"
+    },
+    {
+        "id": 6,
+        "src": "/uploads/thumbnails/SAM_0220.JPG",
+        "cluster": "Streets",
+        "location": "London"
+    },
+    {
+        "id": 7,
+        "src": "/uploads/thumbnails/SAM_0221.JPG",
+        "cluster": "Nature",
+        "location": "Antalya"
+    },
+    {
+        "id": 14,
+        "src": "/uploads/thumbnails/SAM_0220.JPG",
+        "cluster": "Nature",
+        "location": "Kapadokya"
+    },
+    {
+        "id": 8,
+        "src": "/uploads/thumbnails/SAM_0219.JPG",
+        "cluster": "Portraits",
+        "location": "Istanbul"
+    },
+    {
+        "id": 9,
+        "src": "/uploads/thumbnails/SAM_0530.JPG",
+        "cluster": "Portraits",
+        "location": "Amsterdam"
+    },
+    {
+        "id": 10,
+        "src": "/uploads/thumbnails/SAM_0220.JPG",
+        "cluster": "Streets",
+        "location": "Barcelona"
+    },
+    {
+        "id": 11,
+        "src": "/uploads/thumbnails/SAM_0219.JPG",
+        "cluster": "Nature",
+        "location": "Bolu"
+    },
+    {
+        "id": 12,
+        "src": "/uploads/thumbnails/SAM_0221.JPG",
+        "cluster": "Streets",
+        "location": "Roma"
+    },
+    {
+        "id": 13,
+        "src": "/uploads/thumbnails/SAM_0530.JPG",
+        "cluster": "Portraits",
+        "location": "Istanbul"
+    },
+    {
+        "id": 15,
+        "src": "/uploads/thumbnails/SAM_0219.JPG",
+        "cluster": "Portraits",
+        "location": "Berlin"
+    },
+    {
+        "id": 16,
+        "src": "/uploads/thumbnails/SAM_0221.JPG",
+        "cluster": "Streets",
+        "location": "New York"
+    },
+    {
+        "id": 17,
+        "src": "/uploads/thumbnails/SAM_0530.JPG",
+        "cluster": "Nature",
+        "location": "Trabzon"
+    },
+    {
+        "id": 18,
+        "src": "/uploads/thumbnails/SAM_0220.JPG",
+        "cluster": "Streets",
+        "location": "Paris"
+    },
+    {
+        "id": 19,
+        "src": "/uploads/thumbnails/SAM_0219.JPG",
+        "cluster": "Portraits",
+        "location": "Istanbul"
+    },
+    {
+        "id": 20,
+        "src": "/uploads/thumbnails/SAM_0221.JPG",
+        "cluster": "Nature",
+        "location": "Antalya"
+    },
+    {
+        "id": 21,
+        "src": "/uploads/thumbnails/SAM_0530.JPG",
+        "cluster": "Portraits",
+        "location": "Amsterdam"
+    },
+    {
+        "id": 22,
+        "src": "/uploads/thumbnails/SAM_0220.JPG",
+        "cluster": "Streets",
+        "location": "Tokyo"
+    },
+    {
+        "id": 23,
+        "src": "/uploads/thumbnails/SAM_0219.JPG",
+        "cluster": "Nature",
+        "location": "Bolu"
+    }
+]

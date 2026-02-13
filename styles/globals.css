@@ -1,22 +1,20 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-background: #F9F9F9;
+  --color-foreground: #171717;
+}
+
 :root {
   --background: #F9F9F9;
   --foreground: #171717;
   --border: #E5E5E5;
   --muted: #737373;
+  color-scheme: light only;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  overflow-y: scroll;
 }
 
 body {
