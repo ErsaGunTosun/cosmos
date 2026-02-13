@@ -14,7 +14,15 @@ export default function ProfileHeader({ profile, elementCount }) {
     return (
         <div className="flex flex-col items-center text-center mb-8">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 via-orange-400 to-pink-500 mb-4" />
+            {profile.avatar_url ? (
+                <img
+                    src={profile.avatar_url}
+                    alt={profile.name}
+                    className="w-20 h-20 rounded-full object-cover mb-4"
+                />
+            ) : (
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 via-orange-400 to-pink-500 mb-4" />
+            )}
 
             {/* Name */}
             <h1 className="text-2xl font-semibold text-[var(--foreground)] tracking-tight">

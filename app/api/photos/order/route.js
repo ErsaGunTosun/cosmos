@@ -1,16 +1,21 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { verifyAuth } from '@/lib/auth';
 
-// GET: Fotoğrafları sıralı getir
+// GET: Fotoğrafları sıralı getir (public)
 export async function GET() {
     const { rows } = await pool.query(
-        'SELECT id, src, cluster, location FROM photos ORDER BY sort_order ASC'
+        'SELECT id, src, cluster, location, blur_data FROM photos ORDER BY sort_order ASC'
     );
     return NextResponse.json(rows);
 }
 
-// PUT: Sırayı güncelle
+// PUT: Sırayı güncelle (auth required)
 export async function PUT(request) {
+    if (!verifyAuth(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { order } = await request.json();
     if (!Array.isArray(order)) {
         return NextResponse.json({ error: 'order must be an array of ids' }, { status: 400 });

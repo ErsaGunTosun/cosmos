@@ -18,18 +18,18 @@ function PhotoImage({ photo, draggable = true }) {
 
     return (
         <>
-            {!loaded && <Skeleton />}
+            {!loaded && !photo.blur_data && <Skeleton />}
             <Image
                 src={photo.src}
                 alt={photo.alt || 'Photo'}
                 width={800}
                 height={600}
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className={`w-full h-auto block transition-all duration-300 group-hover:brightness-[0.6] ${
-                    loaded ? '' : 'invisible absolute'
-                }`}
+                className={`w-full h-auto block transition-all duration-300 group-hover:brightness-[0.6] ${loaded || photo.blur_data ? '' : 'invisible absolute'
+                    }`}
                 draggable={!draggable ? undefined : false}
                 onLoad={() => setLoaded(true)}
+                {...(photo.blur_data ? { placeholder: 'blur', blurDataURL: photo.blur_data } : {})}
             />
         </>
     );
@@ -99,9 +99,8 @@ function DraggablePhotoCard({ photo, isDragging }) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`break-inside-avoid cursor-pointer group relative ${
-                isDragging ? 'opacity-30' : ''
-            }`}
+            className={`break-inside-avoid cursor-pointer group relative ${isDragging ? 'opacity-30' : ''
+                }`}
             {...attributes}
             {...listeners}
             onPointerDown={handlePointerDown}

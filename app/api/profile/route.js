@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { verifyAuth } from '@/lib/auth';
 
-// GET: Profil bilgilerini getir
+// GET: Profil bilgilerini getir (public)
 export async function GET() {
     const { rows } = await pool.query('SELECT name, username, bio, avatar_url FROM profile WHERE id = 1');
     if (rows.length === 0) {
@@ -10,8 +11,12 @@ export async function GET() {
     return NextResponse.json(rows[0]);
 }
 
-// PUT: Profil bilgilerini güncelle
+// PUT: Profil bilgilerini güncelle (auth required)
 export async function PUT(request) {
+    if (!verifyAuth(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { name, username, bio } = await request.json();
 
     await pool.query(

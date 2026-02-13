@@ -9,8 +9,10 @@ export default function PhotoDetail({ params }) {
     const { id } = use(params);
     const router = useRouter();
     const [photo, setPhoto] = useState(null);
+    const [imgLoaded, setImgLoaded] = useState(false);
 
     useEffect(() => {
+        setImgLoaded(false);
         fetch(`/api/photos/${id}`)
             .then(res => res.json())
             .then(data => setPhoto(data));
@@ -29,8 +31,14 @@ export default function PhotoDetail({ params }) {
 
     if (!photo) {
         return (
-            <div className="h-screen flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-[var(--muted)] border-t-transparent rounded-full animate-spin" />
+            <div className="h-screen flex items-center justify-center bg-[var(--background)]">
+                <div className="splash-content">
+                    <h1 className="splash-title">Noir</h1>
+                    <div className="splash-sub">
+                        <span className="splash-star">✦</span>
+                        <p className="splash-text">Made For Kedi Nur</p>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -55,12 +63,18 @@ export default function PhotoDetail({ params }) {
                 {/* Fotoğraf */}
                 <div className="flex-1 flex items-center justify-center min-h-0 px-12 pb-4">
                     <div className="relative w-full max-w-2xl h-full">
+                        {!imgLoaded && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-24 h-24 rounded-xl bg-gray-200 animate-pulse" />
+                            </div>
+                        )}
                         <Image
-                            src={photo.src}
+                            src={photo.original_src || photo.src}
                             alt="Photo"
                             fill
-                            className="object-contain"
+                            className={`object-contain transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                             priority
+                            onLoad={() => setImgLoaded(true)}
                         />
                     </div>
                 </div>
@@ -115,6 +129,70 @@ export default function PhotoDetail({ params }) {
                     </div>
                 </div>
 
+                {/* EXIF bilgileri */}
+                {photo.exif_data && (
+                    <>
+                        <div className="h-px bg-[var(--border)]" />
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Camera Info</span>
+                            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+                                {photo.exif_data.camera && (
+                                    <div className="col-span-2">
+                                        <p className="text-xs text-[var(--muted)]">Camera</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.camera}</p>
+                                    </div>
+                                )}
+                                {photo.exif_data.lens && (
+                                    <div className="col-span-2">
+                                        <p className="text-xs text-[var(--muted)]">Lens</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.lens}</p>
+                                    </div>
+                                )}
+                                {photo.exif_data.focalLength && (
+                                    <div>
+                                        <p className="text-xs text-[var(--muted)]">Focal Length</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.focalLength}</p>
+                                    </div>
+                                )}
+                                {photo.exif_data.aperture && (
+                                    <div>
+                                        <p className="text-xs text-[var(--muted)]">Aperture</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.aperture}</p>
+                                    </div>
+                                )}
+                                {photo.exif_data.shutter && (
+                                    <div>
+                                        <p className="text-xs text-[var(--muted)]">Shutter</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.shutter}</p>
+                                    </div>
+                                )}
+                                {photo.exif_data.iso && (
+                                    <div>
+                                        <p className="text-xs text-[var(--muted)]">ISO</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.iso}</p>
+                                    </div>
+                                )}
+                                {photo.exif_data.date && (
+                                    <div className="col-span-2">
+                                        <p className="text-xs text-[var(--muted)]">Date</p>
+                                        <p className="text-sm text-[var(--foreground)]">
+                                            {new Date(photo.exif_data.date).toLocaleDateString('tr-TR', {
+                                                year: 'numeric', month: 'long', day: 'numeric'
+                                            })}
+                                        </p>
+                                    </div>
+                                )}
+                                {photo.exif_data.width && photo.exif_data.height && (
+                                    <div className="col-span-2">
+                                        <p className="text-xs text-[var(--muted)]">Resolution</p>
+                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.width} × {photo.exif_data.height}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+
                 <div className="h-px bg-[var(--border)]" />
 
                 {photo.cluster && (
@@ -124,7 +202,6 @@ export default function PhotoDetail({ params }) {
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0" />
                             <div>
                                 <p className="text-sm font-medium text-[var(--foreground)]">{photo.cluster}</p>
-                                <p className="text-xs text-[var(--muted)]">@faithme</p>
                             </div>
                         </div>
                     </div>

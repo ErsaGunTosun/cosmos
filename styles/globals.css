@@ -60,3 +60,73 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.4s ease-out;
 }
+
+/* Splash Screen */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  animation: splashFadeOut 0.6s ease-in 1.8s forwards;
+  pointer-events: none;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: splashIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.splash-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--foreground);
+}
+
+.splash-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.splash-star {
+  color: var(--muted);
+  font-size: 0.875rem;
+  animation: starRotate 2s ease-in-out infinite;
+}
+
+.splash-text {
+  font-size: 0.875rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.splash-page {
+  animation: pageIn 0.5s ease-out 2s both;
+}
+
+@keyframes splashIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes splashFadeOut {
+  from { opacity: 1; visibility: visible; }
+  to { opacity: 0; visibility: hidden; }
+}
+
+@keyframes starRotate {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+}
+
+@keyframes pageIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

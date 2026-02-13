@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Container from '@/components/layout/Container';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ViewSwitcher from '@/components/gallery/ViewSwitcher';
 import PhotoGrid from '@/components/gallery/PhotoGrid';
 import GridSkeleton from '@/components/gallery/GridSkeleton';
+import ClusterGrid from '@/components/gallery/ClusterGrid';
+import ClusterDetail from '@/components/gallery/ClusterDetail';
 import Footer from '@/components/layout/Footer';
 
 export default function HomeClient({ profile }) {
@@ -13,6 +15,7 @@ export default function HomeClient({ profile }) {
     const [photos, setPhotos] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [selectedCluster, setSelectedCluster] = useState(null);
 
     useEffect(() => {
         fetch('/api/photos/order')
@@ -22,6 +25,16 @@ export default function HomeClient({ profile }) {
         fetch('/api/auth')
             .then(res => { if (res.ok) setIsAdmin(true); });
     }, []);
+
+    const clusterCount = useMemo(() => {
+        const names = new Set(photos.map(p => p.cluster || 'Uncategorized'));
+        return names.size;
+    }, [photos]);
+
+    function handleViewChange(v) {
+        setView(v);
+        setSelectedCluster(null);
+    }
 
     return (
         <main className="min-h-screen relative">
@@ -37,23 +50,35 @@ export default function HomeClient({ profile }) {
                 <ProfileHeader profile={profile} elementCount={photos.length} />
                 <ViewSwitcher
                     view={view}
-                    setView={setView}
+                    setView={handleViewChange}
                     elementCount={photos.length}
-                    clusterCount={4}
+                    clusterCount={clusterCount}
                 />
             </Container>
 
-            {view === 'elements' && (
-                loading ? <GridSkeleton /> : <PhotoGrid photos={photos} readonly />
-            )}
+            <div key={view + (selectedCluster || '')} className="animate-fadeIn">
+                {view === 'elements' && (
+                    loading ? <GridSkeleton /> : <PhotoGrid photos={photos} readonly />
+                )}
 
-            {view === 'clusters' && (
-                <Container className="pb-12">
-                    <p className="text-center text-[var(--muted)] text-sm py-20">
-                        Clusters coming soon
-                    </p>
-                </Container>
-            )}
+                {view === 'clusters' && !loading && (
+                    selectedCluster ? (
+                        <ClusterDetail
+                            clusterName={selectedCluster}
+                            photos={photos}
+                            onBack={() => setSelectedCluster(null)}
+                        />
+                    ) : (
+                        <ClusterGrid
+                            photos={photos}
+                            onSelectCluster={setSelectedCluster}
+                        />
+                    )
+                )}
+
+                {view === 'clusters' && loading && <GridSkeleton />}
+            </div>
+
             <Footer />
         </main>
     );

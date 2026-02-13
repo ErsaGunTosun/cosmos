@@ -80,7 +80,7 @@ export default function AdminPhotoEdit({ params }) {
                 <div className="flex-1 flex items-center justify-center min-h-0 px-12 pb-4">
                     <div className="relative w-full max-w-2xl h-full">
                         <Image
-                            src={photo.src}
+                            src={photo.original_src || photo.src}
                             alt="Photo"
                             fill
                             className="object-contain"
