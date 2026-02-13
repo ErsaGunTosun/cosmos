@@ -5,6 +5,8 @@ import {
     DndContext,
     closestCenter,
     PointerSensor,
+    TouchSensor,
+    KeyboardSensor,
     useSensor,
     useSensors,
     DragOverlay,
@@ -12,7 +14,9 @@ import {
 import {
     SortableContext,
     rectSortingStrategy,
+    sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+
 import PhotoCard from './PhotoCard';
 import Container from '../layout/Container';
 import Image from 'next/image';
@@ -24,6 +28,13 @@ export default function PhotoGrid({ photos, onReorder, readonly = false }) {
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: { distance: 8 },
+        }),
+        useSensor(TouchSensor, {
+            // Mobilde kaydırma ile karışmaması için 250ms basılı tutma gerekli
+            activationConstraint: { delay: 250, tolerance: 5 },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 

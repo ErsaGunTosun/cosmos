@@ -58,7 +58,15 @@ export default function HomeClient({ profile }) {
 
             <div key={view + (selectedCluster || '')} className="animate-fadeIn">
                 {view === 'elements' && (
-                    loading ? <GridSkeleton /> : <PhotoGrid photos={photos} readonly />
+                    loading ? <GridSkeleton /> : (
+                        photos.length > 0 ? (
+                            <PhotoGrid photos={photos} readonly />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
+                                <p className="text-[var(--muted)] text-sm tracking-wide">No memories yet.</p>
+                            </div>
+                        )
+                    )
                 )}
 
                 {view === 'clusters' && !loading && (
@@ -69,10 +77,16 @@ export default function HomeClient({ profile }) {
                             onBack={() => setSelectedCluster(null)}
                         />
                     ) : (
-                        <ClusterGrid
-                            photos={photos}
-                            onSelectCluster={setSelectedCluster}
-                        />
+                        photos.length > 0 ? (
+                            <ClusterGrid
+                                photos={photos}
+                                onSelectCluster={setSelectedCluster}
+                            />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
+                                <p className="text-[var(--muted)] text-sm tracking-wide">No memories yet.</p>
+                            </div>
+                        )
                     )
                 )}
 

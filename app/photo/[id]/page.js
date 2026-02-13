@@ -10,6 +10,7 @@ export default function PhotoDetail({ params }) {
     const router = useRouter();
     const [photo, setPhoto] = useState(null);
     const [imgLoaded, setImgLoaded] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
 
     useEffect(() => {
         setImgLoaded(false);
@@ -44,11 +45,29 @@ export default function PhotoDetail({ params }) {
     }
 
     return (
-        <div className="h-screen overflow-hidden flex flex-col lg:flex-row">
-            {/* Sol: Fotoğraf */}
-            <div className="flex-1 flex flex-col bg-[#F5F5F5] min-h-0">
-                {/* Üst bar */}
-                <div className="shrink-0 p-5">
+        <div className="h-[100dvh] overflow-hidden flex flex-col lg:flex-row bg-[#F5F5F5]">
+            {/* Sol: Fotoğraf Alanı */}
+            <div className="relative flex-1 w-full h-full flex flex-col">
+                {/* Mobile: Üst Header (Back + Info) */}
+                <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between lg:hidden pointer-events-none">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2 text-sm text-[var(--foreground)] bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-auto"
+                    >
+                        ← Back
+                    </Link>
+                    <button
+                        onClick={() => setShowInfo(!showInfo)}
+                        className="p-2 text-[var(--foreground)] bg-white/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Desktop: Back Link */}
+                <div className="hidden lg:block shrink-0 p-5 z-10">
                     <Link
                         href="/"
                         className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
@@ -61,8 +80,8 @@ export default function PhotoDetail({ params }) {
                 </div>
 
                 {/* Fotoğraf */}
-                <div className="flex-1 flex items-center justify-center min-h-0 px-12 pb-4">
-                    <div className="relative w-full max-w-2xl h-full">
+                <div className="flex-1 flex items-center justify-center min-h-0 px-4 lg:px-12 pb-4 lg:pb-4 pt-20 lg:pt-0 relative">
+                    <div className="relative w-full h-full max-w-5xl">
                         {!imgLoaded && (
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="w-24 h-24 rounded-xl bg-gray-200 animate-pulse" />
@@ -79,134 +98,146 @@ export default function PhotoDetail({ params }) {
                     </div>
                 </div>
 
-                {/* Alt: Navigasyon */}
-                <div className="shrink-0 flex items-center justify-center gap-4 pb-5">
+                {/* Navigasyon (Mobile & Desktop) */}
+                <div className="shrink-0 flex items-center justify-center gap-8 pb-8 lg:pb-5 z-10 relative">
                     {photo.prev ? (
                         <Link
                             href={`/photo/${photo.prev}`}
-                            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+                            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors px-4 py-2"
                         >
                             ← Prev
                         </Link>
-                    ) : <span className="text-sm text-transparent select-none">← Prev</span>}
+                    ) : <span className="text-sm text-transparent select-none px-4 py-2">← Prev</span>}
 
                     {photo.next ? (
                         <Link
                             href={`/photo/${photo.next}`}
-                            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+                            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors px-4 py-2"
                         >
                             Next →
                         </Link>
-                    ) : <span className="text-sm text-transparent select-none">Next →</span>}
+                    ) : <span className="text-sm text-transparent select-none px-4 py-2">Next →</span>}
                 </div>
             </div>
 
-            {/* Sağ: Sidebar */}
-            <div className="w-full lg:w-80 shrink-0 border-l border-[var(--border)] bg-white p-6 flex flex-col gap-6">
-                {/* Üst butonlar */}
-                <div className="flex items-center justify-end gap-2">
-                    <button className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer">
-                        <svg className="w-4 h-4 text-[var(--muted)]" fill="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="5" r="2" />
-                            <circle cx="12" cy="12" r="2" />
-                            <circle cx="12" cy="19" r="2" />
-                        </svg>
-                    </button>
-                </div>
+            {/* Sağ: Sidebar / Mobile Bottom Sheet */}
+            <>
+                {/* Mobile Backdrop */}
+                {showInfo && (
+                    <div
+                        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+                        onClick={() => setShowInfo(false)}
+                    />
+                )}
 
-                {/* Meta bilgiler */}
-                <div className="flex flex-col gap-4">
-                    {photo.location && (
+                <div className={`
+                    fixed lg:static inset-x-0 bottom-0 z-40 
+                    bg-white lg:bg-white 
+                    w-full lg:w-80 lg:shrink-0 
+                    border-t lg:border-t-0 lg:border-l border-[var(--border)] 
+                    p-6 flex flex-col gap-6 
+                    transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1)
+                    rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none
+                    min-h-[50vh] max-h-[85vh] lg:min-h-0 lg:max-h-none overflow-y-auto
+                    ${showInfo ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+                `}>
+                    {/* Mobile Pull Indicator */}
+                    <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-2 lg:hidden" />
+
+                    {/* Meta bilgiler */}
+                    <div className="flex flex-col gap-4">
+                        {photo.location && (
+                            <div>
+                                <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Location</span>
+                                <p className="text-sm text-[var(--foreground)] mt-1">{photo.location}</p>
+                            </div>
+                        )}
+
                         <div>
-                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Location</span>
-                            <p className="text-sm text-[var(--foreground)] mt-1">{photo.location}</p>
+                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">File</span>
+                            <p className="text-sm text-[var(--muted)] mt-1">{photo.src.split('/').pop()}</p>
                         </div>
+                    </div>
+
+                    {/* EXIF bilgileri */}
+                    {photo.exif_data && (
+                        <>
+                            <div className="h-px bg-[var(--border)]" />
+                            <div>
+                                <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Camera Info</span>
+                                <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+                                    {photo.exif_data.camera && (
+                                        <div className="col-span-2">
+                                            <p className="text-xs text-[var(--muted)]">Camera</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.camera}</p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.lens && (
+                                        <div className="col-span-2">
+                                            <p className="text-xs text-[var(--muted)]">Lens</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.lens}</p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.focalLength && (
+                                        <div>
+                                            <p className="text-xs text-[var(--muted)]">Focal Length</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.focalLength}</p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.aperture && (
+                                        <div>
+                                            <p className="text-xs text-[var(--muted)]">Aperture</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.aperture}</p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.shutter && (
+                                        <div>
+                                            <p className="text-xs text-[var(--muted)]">Shutter</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.shutter}</p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.iso && (
+                                        <div>
+                                            <p className="text-xs text-[var(--muted)]">ISO</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.iso}</p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.date && (
+                                        <div className="col-span-2">
+                                            <p className="text-xs text-[var(--muted)]">Date</p>
+                                            <p className="text-sm text-[var(--foreground)]">
+                                                {new Date(photo.exif_data.date).toLocaleDateString('tr-TR', {
+                                                    year: 'numeric', month: 'long', day: 'numeric'
+                                                })}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {photo.exif_data.width && photo.exif_data.height && (
+                                        <div className="col-span-2">
+                                            <p className="text-xs text-[var(--muted)]">Resolution</p>
+                                            <p className="text-sm text-[var(--foreground)]">{photo.exif_data.width} × {photo.exif_data.height}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
                     )}
 
-                    <div>
-                        <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">File</span>
-                        <p className="text-sm text-[var(--muted)] mt-1">{photo.src.split('/').pop()}</p>
-                    </div>
-                </div>
+                    <div className="h-px bg-[var(--border)]" />
 
-                {/* EXIF bilgileri */}
-                {photo.exif_data && (
-                    <>
-                        <div className="h-px bg-[var(--border)]" />
+                    {photo.cluster && (
                         <div>
-                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Camera Info</span>
-                            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
-                                {photo.exif_data.camera && (
-                                    <div className="col-span-2">
-                                        <p className="text-xs text-[var(--muted)]">Camera</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.camera}</p>
-                                    </div>
-                                )}
-                                {photo.exif_data.lens && (
-                                    <div className="col-span-2">
-                                        <p className="text-xs text-[var(--muted)]">Lens</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.lens}</p>
-                                    </div>
-                                )}
-                                {photo.exif_data.focalLength && (
-                                    <div>
-                                        <p className="text-xs text-[var(--muted)]">Focal Length</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.focalLength}</p>
-                                    </div>
-                                )}
-                                {photo.exif_data.aperture && (
-                                    <div>
-                                        <p className="text-xs text-[var(--muted)]">Aperture</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.aperture}</p>
-                                    </div>
-                                )}
-                                {photo.exif_data.shutter && (
-                                    <div>
-                                        <p className="text-xs text-[var(--muted)]">Shutter</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.shutter}</p>
-                                    </div>
-                                )}
-                                {photo.exif_data.iso && (
-                                    <div>
-                                        <p className="text-xs text-[var(--muted)]">ISO</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.iso}</p>
-                                    </div>
-                                )}
-                                {photo.exif_data.date && (
-                                    <div className="col-span-2">
-                                        <p className="text-xs text-[var(--muted)]">Date</p>
-                                        <p className="text-sm text-[var(--foreground)]">
-                                            {new Date(photo.exif_data.date).toLocaleDateString('tr-TR', {
-                                                year: 'numeric', month: 'long', day: 'numeric'
-                                            })}
-                                        </p>
-                                    </div>
-                                )}
-                                {photo.exif_data.width && photo.exif_data.height && (
-                                    <div className="col-span-2">
-                                        <p className="text-xs text-[var(--muted)]">Resolution</p>
-                                        <p className="text-sm text-[var(--foreground)]">{photo.exif_data.width} × {photo.exif_data.height}</p>
-                                    </div>
-                                )}
+                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Cluster</span>
+                            <div className="mt-2 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-medium text-[var(--foreground)]">{photo.cluster}</p>
+                                </div>
                             </div>
                         </div>
-                    </>
-                )}
-
-                <div className="h-px bg-[var(--border)]" />
-
-                {photo.cluster && (
-                    <div>
-                        <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Cluster</span>
-                        <div className="mt-2 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0" />
-                            <div>
-                                <p className="text-sm font-medium text-[var(--foreground)]">{photo.cluster}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            </>
         </div>
     );
 }
