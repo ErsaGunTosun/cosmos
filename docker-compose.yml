@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: noir-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://cosmos_user:cosmos_password@db:5432/cosmos
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./public:/app/public
+    depends_on:
+      - db
+
+  db:
+    container_name: noir-db
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=cosmos_user
+      - POSTGRES_PASSWORD=cosmos_password
+      - POSTGRES_DB=cosmos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
