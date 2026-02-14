@@ -25,7 +25,7 @@ export async function GET(request, { params }) {
     }
 
     try {
-
+        const fileBuffer = fs.readFileSync(filePath);
         const ext = path.extname(filePath).toLowerCase();
         let contentType = 'application/octet-stream';
 
