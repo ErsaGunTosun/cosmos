@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 export async function GET(request, { params }) {
-    const { path: urlPath } = params;
+    const { path: urlPath } = await params;
 
     // Güvenlik: Path traversal saldırılarını önle
     const sanitizedPath = urlPath.join('/').replace(/(\.\.(\/|\\|$))+/g, '');
