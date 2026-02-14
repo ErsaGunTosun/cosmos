@@ -62,7 +62,9 @@ export async function POST(request) {
         // Blur oluşturulamazsa sorun değil
     }
 
-    const baseName = `${Date.now()}_${file.name.replace(/\.[^/.]+$/, '')}`;
+    // Dosya ismindeki boşlukları temizle
+    const sanitizedFileName = file.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '');
+    const baseName = `${Date.now()}_${sanitizedFileName.replace(/\.[^/.]+$/, '')}`;
 
     // 1. Orijinali kaydet
     const originalsDir = path.join(process.cwd(), 'public', 'uploads', 'originals');
