@@ -10,9 +10,18 @@ export async function GET(request, { params }) {
 
     const filePath = path.join(process.cwd(), 'public', 'uploads', sanitizedPath);
 
+    console.log('Media Request:', {
+        urlPath,
+        sanitizedPath,
+        fullPath: filePath,
+        exists: fs.existsSync(filePath),
+        cwd: process.cwd()
+    });
+
     // Dosya var mı kontrol et
     if (!fs.existsSync(filePath)) {
-        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+        console.error('File not found:', filePath);
+        return NextResponse.json({ error: 'File not found', path: filePath }, { status: 404 });
     }
 
     try {
