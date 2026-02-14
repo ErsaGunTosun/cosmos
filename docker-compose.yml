@@ -13,7 +13,7 @@ services:
       - DATABASE_URL=postgresql://cosmos_user:cosmos_password@db:5432/cosmos
       - JWT_SECRET=${JWT_SECRET}
     volumes:
-      - ./public:/app/public
+      - ./public/uploads:/app/public/uploads
     depends_on:
       - db
 

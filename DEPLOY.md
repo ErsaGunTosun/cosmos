@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 INSERT INTO admins (username, password_hash, display_name)
-VALUES ('admin', '$2b$10$MseGFHfgL3/JpLQZYNaxMedqpwJVV6.y69bG9wra7yBEo.RmUxIeu', 'Admin')
+VALUES ('kedinur', '$2b$10$1AE6pFEkCnTOKGd39O3sD.PpBhzUcJX9014CpmWW62VRLsvmrVf6G', 'Kedi Nur')
 ON CONFLICT DO NOTHING;
 
 "

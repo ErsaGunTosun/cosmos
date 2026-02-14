@@ -54,7 +54,9 @@ Yüklenen resimlerin kaybolmaması için `public` klasörünün altında `upload
 
 ```bash
 mkdir -p public/uploads
+sudo chmod -R 777 public/uploads
 ```
+*Not: Docker içindeki kullanıcının (uid:1001) bu klasöre yazabilmesi için izinlerin açık olması gerekir.*
 
 ## 3. Uygulamayı Başlat (Sihirli Kısım) ✨
 
@@ -110,7 +112,7 @@ VALUES (1, 'Müge', 'faithme', 'Photographer based in Istanbul')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO admins (username, password_hash, display_name)
-VALUES ('admin', '$2b$10$MseGFHfgL3/JpLQZYNaxMedqpwJVV6.y69bG9wra7yBEo.RmUxIeu', 'Admin')
+VALUES ('kedinur', '$2b$10$1AE6pFEkCnTOKGd39O3sD.PpBhzUcJX9014CpmWW62VRLsvmrVf6G', 'Kedi Nur')
 ON CONFLICT DO NOTHING;
 
 "
@@ -154,4 +156,23 @@ sudo ln -s /etc/nginx/sites-available/noir /etc/nginx/sites-enabled/
 sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx
 ```
+
+## 6. Yönetim Komutları
+
+**Durdurmak için:**
+```bash
+sudo docker compose down
+```
+
+**Güncellemek için:**
+(Kodu sunucuya çektikten sonra)
+```bash
+sudo docker compose up -d --build
+```
+
+**Logları izlemek için:**
+```bash
+sudo docker compose logs -f
+```
+
 Tebrikler! 🎉
