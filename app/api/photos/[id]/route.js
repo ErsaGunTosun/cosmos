@@ -6,9 +6,17 @@ import { verifyAuth } from '@/lib/auth';
 export async function GET(request, { params }) {
     const { id } = await params;
 
-    const { rows } = await pool.query(
-        'SELECT id, src, original_src, cluster, location, exif_data FROM photos ORDER BY sort_order ASC'
-    );
+    const { rows } = await pool.query(`
+        SELECT 
+            p.id, p.src, p.original_src, p.exif_data,
+            c.name as cluster, 
+            l.name as location,
+            p.cluster_id, p.location_id
+        FROM photos p
+        LEFT JOIN clusters c ON p.cluster_id = c.id
+        LEFT JOIN locations l ON p.location_id = l.id
+        ORDER BY p.sort_order ASC
+    `);
 
     const index = rows.findIndex(p => p.id === Number(id));
     if (index === -1) {
@@ -31,9 +39,31 @@ export async function PUT(request, { params }) {
     const { id } = await params;
     const { cluster, location } = await request.json();
 
+    let clusterId = null;
+    if (cluster) {
+        const clRes = await pool.query('SELECT id FROM clusters WHERE name = $1', [cluster]);
+        if (clRes.rows.length > 0) {
+            clusterId = clRes.rows[0].id;
+        } else {
+            const newCl = await pool.query('INSERT INTO clusters (name) VALUES ($1) RETURNING id', [cluster]);
+            clusterId = newCl.rows[0].id;
+        }
+    }
+
+    let locationId = null;
+    if (location) {
+        const locRes = await pool.query('SELECT id FROM locations WHERE name = $1', [location]);
+        if (locRes.rows.length > 0) {
+            locationId = locRes.rows[0].id;
+        } else {
+            const newLoc = await pool.query('INSERT INTO locations (name) VALUES ($1) RETURNING id', [location]);
+            locationId = newLoc.rows[0].id;
+        }
+    }
+
     await pool.query(
-        'UPDATE photos SET cluster = $1, location = $2 WHERE id = $3',
-        [cluster || null, location || null, Number(id)]
+        'UPDATE photos SET cluster_id = $1, location_id = $2 WHERE id = $3',
+        [clusterId, locationId, Number(id)]
     );
 
     return NextResponse.json({ success: true });

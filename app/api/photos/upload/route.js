@@ -85,12 +85,36 @@ export async function POST(request) {
     const originalSrc = `/uploads/originals/${originalFileName}`;
 
     // 3. Veritabanına ekle
+    let clusterId = null;
+    if (cluster) {
+        // Kategori var mı kontrol et, yoksa ekle
+        const clRes = await pool.query('SELECT id FROM clusters WHERE name = $1', [cluster]);
+        if (clRes.rows.length > 0) {
+            clusterId = clRes.rows[0].id;
+        } else {
+            const newCl = await pool.query('INSERT INTO clusters (name) VALUES ($1) RETURNING id', [cluster]);
+            clusterId = newCl.rows[0].id;
+        }
+    }
+
+    let locationId = null;
+    if (location) {
+        // Lokasyon var mı kontrol et, yoksa ekle
+        const locRes = await pool.query('SELECT id FROM locations WHERE name = $1', [location]);
+        if (locRes.rows.length > 0) {
+            locationId = locRes.rows[0].id;
+        } else {
+            const newLoc = await pool.query('INSERT INTO locations (name) VALUES ($1) RETURNING id', [location]);
+            locationId = newLoc.rows[0].id;
+        }
+    }
+
     const { rows: maxRows } = await pool.query('SELECT COALESCE(MAX(sort_order), -1) + 1 as next_order FROM photos');
     const nextOrder = maxRows[0].next_order;
 
     const { rows } = await pool.query(
-        'INSERT INTO photos (src, original_src, cluster, location, sort_order, exif_data, blur_data) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-        [src, originalSrc, cluster, location, nextOrder, exifData ? JSON.stringify(exifData) : null, blurData]
+        'INSERT INTO photos (src, original_src, cluster_id, location_id, sort_order, exif_data, blur_data) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+        [src, originalSrc, clusterId, locationId, nextOrder, exifData ? JSON.stringify(exifData) : null, blurData]
     );
 
     return NextResponse.json({ id: rows[0].id, src, originalSrc });

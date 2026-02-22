@@ -10,7 +10,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://cosmos_user:cosmos_password@db:5432/cosmos
+      - DATABASE_URL=postgresql://cosmos_user:cosmos_password@db:5432/noir
       - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./public/uploads:/app/public/uploads
@@ -19,16 +19,20 @@ services:
 
   db:
     container_name: noir-db
-    image: postgres:15-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.db
     restart: always
     environment:
       - POSTGRES_USER=cosmos_user
       - POSTGRES_PASSWORD=cosmos_password
-      - POSTGRES_DB=cosmos
+      - POSTGRES_DB=noir
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5430:5432"
 
 volumes:
   postgres_data:

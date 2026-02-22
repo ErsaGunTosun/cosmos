@@ -25,7 +25,6 @@
 *.pem
 
 # database
-*.db
 *.db-wal
 *.db-shm
 
