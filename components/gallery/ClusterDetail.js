@@ -4,9 +4,10 @@ import Container from '../layout/Container';
 import PhotoCard from './PhotoCard';
 
 export default function ClusterDetail({ clusterName, photos, onBack }) {
-    const filtered = photos.filter(
-        (p) => (p.cluster || 'Uncategorized') === clusterName
-    );
+    const filtered = photos.filter((p) => {
+        const names = (p.clusters && p.clusters.length > 0) ? p.clusters : ['Uncategorized'];
+        return names.includes(clusterName);
+    });
 
     return (
         <>

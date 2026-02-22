@@ -1,19 +1,37 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { verifyAuth } from '@/lib/auth';
+import { readFileSync } from 'fs';
+import path from 'path';
+
+function getConfig() {
+    try {
+        const fileContents = readFileSync(path.join(process.cwd(), 'data', 'config.json'), 'utf8');
+        return JSON.parse(fileContents);
+    } catch {
+        return { theme: 'light', homepage_sort: 'custom' };
+    }
+}
 
 // GET: Fotoğrafları sıralı getir (public)
 export async function GET() {
+    const config = getConfig();
+    const orderBy = config.homepage_sort === 'date' ? 'ORDER BY p.created_at DESC' : 'ORDER BY p.sort_order ASC';
     const { rows } = await pool.query(`
         SELECT 
             p.id, p.src, p.blur_data, 
-            c.name as cluster, 
             l.name as location,
-            p.cluster_id, p.location_id
+            p.location_id,
+            COALESCE(
+                (SELECT json_agg(c.name) 
+                 FROM photo_clusters pc 
+                 JOIN clusters c ON pc.cluster_id = c.id 
+                 WHERE pc.photo_id = p.id), 
+                '[]'::json
+            ) as clusters
         FROM photos p
-        LEFT JOIN clusters c ON p.cluster_id = c.id
         LEFT JOIN locations l ON p.location_id = l.id
-        ORDER BY p.sort_order ASC
+        ${orderBy}
     `);
     return NextResponse.json(rows);
 }

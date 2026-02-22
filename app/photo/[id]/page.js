@@ -45,20 +45,20 @@ export default function PhotoDetail({ params }) {
     }
 
     return (
-        <div className="h-[100dvh] overflow-hidden flex flex-col lg:flex-row bg-[#F5F5F5]">
+        <div className="h-[100dvh] overflow-hidden flex flex-col lg:flex-row bg-[var(--background)]">
             {/* Sol: Fotoğraf Alanı */}
             <div className="relative flex-1 w-full h-full flex flex-col">
                 {/* Mobile: Üst Header (Back + Info) */}
                 <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between lg:hidden pointer-events-none">
                     <Link
                         href="/"
-                        className="inline-flex items-center gap-2 text-sm text-[var(--foreground)] bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-auto"
+                        className="inline-flex items-center gap-2 text-sm text-[var(--foreground)] bg-[var(--background)]/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-auto border border-[var(--border)]"
                     >
                         ← Back
                     </Link>
                     <button
                         onClick={() => setShowInfo(!showInfo)}
-                        className="p-2 text-[var(--foreground)] bg-white/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto"
+                        className="p-2 text-[var(--foreground)] bg-[var(--background)]/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto border border-[var(--border)]"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -132,7 +132,7 @@ export default function PhotoDetail({ params }) {
 
                 <div className={`
                     fixed lg:static inset-x-0 bottom-0 z-40 
-                    bg-white lg:bg-white 
+                    bg-[var(--background)]
                     w-full lg:w-80 lg:shrink-0 
                     border-t lg:border-t-0 lg:border-l border-[var(--border)] 
                     p-6 flex flex-col gap-6 
@@ -146,6 +146,14 @@ export default function PhotoDetail({ params }) {
 
                     {/* Meta bilgiler */}
                     <div className="flex flex-col gap-4">
+                        {photo.description && (
+                            <div>
+                                <p className="text-sm text-[var(--foreground)] italic whitespace-pre-wrap leading-relaxed">
+                                    "{photo.description}"
+                                </p>
+                            </div>
+                        )}
+
                         {photo.location && (
                             <div>
                                 <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Location</span>
@@ -225,14 +233,18 @@ export default function PhotoDetail({ params }) {
 
                     <div className="h-px bg-[var(--border)]" />
 
-                    {photo.cluster && (
+                    {photo.clusters && photo.clusters.length > 0 && (
                         <div>
-                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Cluster</span>
-                            <div className="mt-2 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm font-medium text-[var(--foreground)]">{photo.cluster}</p>
-                                </div>
+                            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Clusters</span>
+                            <div className="mt-2 flex flex-col gap-3">
+                                {photo.clusters.map(cluster => (
+                                    <div key={cluster} className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-[var(--foreground)]/10 flex-shrink-0" />
+                                        <div>
+                                            <p className="text-sm font-medium text-[var(--foreground)]">{cluster}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}

@@ -45,11 +45,13 @@ export default function ClusterGrid({ photos, onSelectCluster }) {
     // Group photos by cluster
     const clusterMap = {};
     photos.forEach((photo) => {
-        const name = photo.cluster || 'Uncategorized';
-        if (!clusterMap[name]) {
-            clusterMap[name] = { name, cover: photo.src, count: 0 };
-        }
-        clusterMap[name].count++;
+        const names = (photo.clusters && photo.clusters.length > 0) ? photo.clusters : ['Uncategorized'];
+        names.forEach(name => {
+            if (!clusterMap[name]) {
+                clusterMap[name] = { name, cover: photo.src, count: 0 };
+            }
+            clusterMap[name].count++;
+        });
     });
 
     const clusters = Object.values(clusterMap);

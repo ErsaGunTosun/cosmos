@@ -42,7 +42,7 @@ export default function EditProfileModal({ profile, onClose, onSaved }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white rounded-xl w-full max-w-sm mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--background)] rounded-xl w-full max-w-sm mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 <form onSubmit={handleSave} className="p-5 flex flex-col gap-4">
                     <h2 className="text-sm font-semibold text-[var(--foreground)]">Edit Profile</h2>
 
@@ -111,14 +111,14 @@ export default function EditProfileModal({ profile, onClose, onSaved }) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-sm text-[var(--muted)] border border-[var(--border)] rounded-full hover:text-[var(--foreground)] transition-colors cursor-pointer"
+                            className="px-4 py-2 text-sm text-[var(--muted)] border border-[var(--border)] rounded-full hover:bg-[var(--foreground)]/5 hover:text-[var(--foreground)] transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="px-4 py-2 text-sm font-medium text-white bg-[var(--foreground)] rounded-full hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                            className="px-4 py-2 text-sm font-medium text-[var(--background)] bg-[var(--foreground)] rounded-full hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                         >
                             {saving ? 'Saving...' : 'Save'}
                         </button>

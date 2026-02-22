@@ -9,18 +9,32 @@ export default function AdminPhotoEdit({ params }) {
     const { id } = use(params);
     const router = useRouter();
     const [photo, setPhoto] = useState(null);
-    const [cluster, setCluster] = useState('');
+    const [clusters, setClusters] = useState([]);
     const [location, setLocation] = useState('');
+    const [description, setDescription] = useState('');
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
+    // Autocomplete states
+    const [availableClusters, setAvailableClusters] = useState([]);
+    const [availableLocations, setAvailableLocations] = useState([]);
+    const [clusterInput, setClusterInput] = useState('');
+    const [showClusterDropdown, setShowClusterDropdown] = useState(false);
+    const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+
+    useEffect(() => {
+        fetch('/api/clusters').then(r => r.json()).then(data => setAvailableClusters(data.map(c => c.name)));
+        fetch('/api/locations').then(r => r.json()).then(data => setAvailableLocations(data.map(l => l.name)));
+    }, []);
 
     useEffect(() => {
         fetch(`/api/photos/${id}`)
             .then(res => res.json())
             .then(data => {
                 setPhoto(data);
-                setCluster(data.cluster || '');
+                setClusters(data.clusters || []);
                 setLocation(data.location || '');
+                setDescription(data.description || '');
             });
     }, [id]);
 
@@ -37,10 +51,15 @@ export default function AdminPhotoEdit({ params }) {
 
     async function handleSave() {
         setSaving(true);
+        const finalClusters = [...clusters];
+        if (clusterInput.trim() && !finalClusters.includes(clusterInput.trim())) {
+            finalClusters.push(clusterInput.trim());
+        }
+
         await fetch(`/api/photos/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cluster, location }),
+            body: JSON.stringify({ clusters: finalClusters, location, description }),
         });
         setSaving(false);
         router.push('/admin');
@@ -53,6 +72,8 @@ export default function AdminPhotoEdit({ params }) {
         router.push('/admin');
     }
 
+    const removeCluster = (c) => setClusters(clusters.filter(x => x !== c));
+
     if (!photo) {
         return (
             <div className="h-screen flex items-center justify-center">
@@ -62,9 +83,9 @@ export default function AdminPhotoEdit({ params }) {
     }
 
     return (
-        <div className="h-screen overflow-hidden flex flex-col lg:flex-row">
+        <div className="h-screen overflow-hidden flex flex-col lg:flex-row bg-[var(--background)]">
             {/* Sol: Fotoğraf */}
-            <div className="flex-1 flex flex-col bg-[#F5F5F5] min-h-0">
+            <div className="flex-1 flex flex-col bg-transparent min-h-0">
                 <div className="shrink-0 p-5">
                     <Link
                         href="/admin"
@@ -111,48 +132,122 @@ export default function AdminPhotoEdit({ params }) {
             </div>
 
             {/* Sağ: Edit Sidebar */}
-            <div className="w-full lg:w-80 shrink-0 border-l border-[var(--border)] bg-white p-6 flex flex-col gap-5">
-                {/* Dosya adı */}
+            <div className="w-full lg:w-80 shrink-0 border-l border-[var(--border)] bg-transparent p-6 flex flex-col gap-5 overflow-y-auto">
                 <div className="text-xs text-[var(--muted)]">
                     {photo.src.split('/').pop()}
                 </div>
 
-                {/* Cluster */}
+                {/* Clusters Autocomplete */}
                 <div>
-                    <label className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Cluster</label>
-                    <input
-                        type="text"
-                        value={cluster}
-                        onChange={e => setCluster(e.target.value)}
-                        placeholder="e.g. Portraits"
-                        className="w-full mt-1 px-3 py-2 text-sm border border-[var(--border)] rounded-lg outline-none focus:border-[var(--foreground)] transition-colors"
-                    />
+                    <label className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Clusters (Categories)</label>
+                    <div className="relative mt-1">
+                        {clusters.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-2">
+                                {clusters.map(c => (
+                                    <span key={c} className="flex items-center gap-1 px-2.5 py-1 text-xs bg-[var(--foreground)]/10 text-[var(--foreground)] rounded-full border border-[var(--border)]">
+                                        {c}
+                                        <button type="button" onClick={() => removeCluster(c)} className="hover:text-red-500 font-bold ml-1">&times;</button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
+                        <input
+                            type="text"
+                            value={clusterInput}
+                            onChange={e => { setClusterInput(e.target.value); setShowClusterDropdown(true); }}
+                            onFocus={() => setShowClusterDropdown(true)}
+                            onBlur={() => setTimeout(() => setShowClusterDropdown(false), 200)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = clusterInput.trim();
+                                    if (val && !clusters.includes(val)) setClusters([...clusters, val]);
+                                    setClusterInput('');
+                                    setShowClusterDropdown(false);
+                                }
+                            }}
+                            placeholder="Type and press Enter, e.g. Portraits"
+                            className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg outline-none focus:border-[var(--foreground)] transition-colors bg-transparent text-[var(--foreground)]"
+                        />
+
+                        {showClusterDropdown && availableClusters.filter(c => c.toLowerCase().includes(clusterInput.toLowerCase()) && !clusters.includes(c)).length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-[var(--background)] border border-[var(--border)] rounded-lg shadow-lg max-h-[40vh] sm:max-h-60 overflow-y-auto">
+                                {availableClusters.filter(c => c.toLowerCase().includes(clusterInput.toLowerCase()) && !clusters.includes(c)).map(c => (
+                                    <button
+                                        key={c}
+                                        type="button"
+                                        onClick={() => {
+                                            setClusters([...clusters, c]);
+                                            setClusterInput('');
+                                            setShowClusterDropdown(false);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--foreground)]/5 transition-colors cursor-pointer"
+                                    >
+                                        {c}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Location */}
+                {/* Location Autocomplete */}
                 <div>
                     <label className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Location</label>
-                    <input
-                        type="text"
-                        value={location}
-                        onChange={e => setLocation(e.target.value)}
-                        placeholder="e.g. Istanbul"
-                        className="w-full mt-1 px-3 py-2 text-sm border border-[var(--border)] rounded-lg outline-none focus:border-[var(--foreground)] transition-colors"
+                    <div className="relative mt-1">
+                        <input
+                            type="text"
+                            value={location}
+                            onChange={e => { setLocation(e.target.value); setShowLocationDropdown(true); }}
+                            onFocus={() => setShowLocationDropdown(true)}
+                            onBlur={() => setTimeout(() => setShowLocationDropdown(false), 200)}
+                            placeholder="e.g. Istanbul"
+                            className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg outline-none focus:border-[var(--foreground)] transition-colors bg-transparent text-[var(--foreground)]"
+                        />
+
+                        {showLocationDropdown && availableLocations.filter(l => l.toLowerCase().includes(location.toLowerCase()) && l !== location).length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-[var(--background)] border border-[var(--border)] rounded-lg shadow-lg max-h-[40vh] sm:max-h-60 overflow-y-auto">
+                                {availableLocations.filter(l => l.toLowerCase().includes(location.toLowerCase()) && l !== location).map(l => (
+                                    <button
+                                        key={l}
+                                        type="button"
+                                        onClick={() => {
+                                            setLocation(l);
+                                            setShowLocationDropdown(false);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--foreground)]/5 transition-colors cursor-pointer"
+                                    >
+                                        {l}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Description Textarea */}
+                <div>
+                    <label className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Description</label>
+                    <textarea
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        placeholder="Write a description or a memory..."
+                        rows={4}
+                        className="w-full mt-1 px-3 py-2 text-sm border border-[var(--border)] rounded-lg outline-none focus:border-[var(--foreground)] transition-colors bg-transparent text-[var(--foreground)] resize-none"
                     />
                 </div>
 
                 <div className="h-px bg-[var(--border)]" />
 
-                {/* Save */}
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="w-full py-2.5 text-sm font-medium text-white bg-[var(--foreground)] rounded-full hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 text-sm font-medium text-[var(--background)] bg-[var(--foreground)] rounded-full hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                 >
                     {saving ? 'Saving...' : 'Save'}
                 </button>
 
-                {/* Delete */}
                 <button
                     onClick={handleDelete}
                     disabled={deleting}

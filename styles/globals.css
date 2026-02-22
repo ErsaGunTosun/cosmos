@@ -10,7 +10,23 @@
   --foreground: #171717;
   --border: #E5E5E5;
   --muted: #737373;
-  color-scheme: light only;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --background: #111111;
+  --foreground: #F9F9F9;
+  --border: #333333;
+  --muted: #A3A3A3;
+  color-scheme: dark;
+}
+
+[data-theme="custom"] {
+  --background: #252422;
+  --foreground: #fffcf2;
+  --border: #403d39;
+  --muted: #ccc5b9;
+  color-scheme: dark;
 }
 
 html {
@@ -96,6 +112,9 @@ body {
 }
 
 .splash-star {
+  display: inline-block;
+  transform-origin: center;
+  line-height: 1;
   color: var(--muted);
   font-size: 0.875rem;
   animation: starRotate 2s ease-in-out infinite;
@@ -112,21 +131,47 @@ body {
 }
 
 @keyframes splashIn {
-  from { opacity: 0; transform: translateY(16px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes splashFadeOut {
-  from { opacity: 1; visibility: visible; }
-  to { opacity: 0; visibility: hidden; }
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 @keyframes starRotate {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.2); }
+
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
 }
 
 @keyframes pageIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

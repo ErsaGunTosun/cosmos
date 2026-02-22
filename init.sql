@@ -37,13 +37,19 @@ CREATE TABLE IF NOT EXISTS photos (
     src TEXT NOT NULL,
     original_src TEXT,
     description TEXT,                                                  
-    cluster_id INTEGER REFERENCES clusters(id) ON DELETE SET NULL,
     location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
     admin_id INTEGER REFERENCES admins(id) ON DELETE SET NULL,         
     sort_order INTEGER DEFAULT 0,
     exif_data JSONB,
     blur_data TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Photo Clusters (Many-to-Many)
+CREATE TABLE IF NOT EXISTS photo_clusters (
+    photo_id INTEGER REFERENCES photos(id) ON DELETE CASCADE,
+    cluster_id INTEGER REFERENCES clusters(id) ON DELETE CASCADE,
+    PRIMARY KEY (photo_id, cluster_id)
 );
 
 -- Initial Data

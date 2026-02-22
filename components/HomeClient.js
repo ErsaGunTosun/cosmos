@@ -27,7 +27,14 @@ export default function HomeClient({ profile }) {
     }, []);
 
     const clusterCount = useMemo(() => {
-        const names = new Set(photos.map(p => p.cluster || 'Uncategorized'));
+        const names = new Set();
+        photos.forEach(p => {
+            if (p.clusters && p.clusters.length > 0) {
+                p.clusters.forEach(c => names.add(c));
+            } else {
+                names.add('Uncategorized');
+            }
+        });
         return names.size;
     }, [photos]);
 
@@ -41,7 +48,7 @@ export default function HomeClient({ profile }) {
             {isAdmin && (
                 <a
                     href="/admin"
-                    className="fixed top-5 right-5 z-50 px-3 py-1.5 text-xs font-medium text-[var(--muted)] bg-white/80 backdrop-blur-sm border border-[var(--border)] rounded-full hover:text-[var(--foreground)] transition-colors"
+                    className="fixed top-5 right-5 z-50 px-3 py-1.5 text-xs font-medium text-[var(--muted)] bg-[var(--background)]/80 backdrop-blur-md border border-[var(--border)] rounded-full hover:bg-[var(--foreground)]/5 hover:text-[var(--foreground)] transition-colors"
                 >
                     Admin
                 </a>

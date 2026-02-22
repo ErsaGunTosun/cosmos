@@ -40,9 +40,8 @@ export default function AdminPhotoCard({ photo, isDragging, onEdit }) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`break-inside-avoid cursor-pointer group relative ${
-                isDragging ? 'opacity-30' : ''
-            }`}
+            className={`break-inside-avoid cursor-pointer group relative ${isDragging ? 'opacity-30' : ''
+                }`}
             {...attributes}
             {...listeners}
             onPointerDown={handlePointerDown}
@@ -67,8 +66,8 @@ export default function AdminPhotoCard({ photo, isDragging, onEdit }) {
 
             {/* Meta badges */}
             <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                {photo.cluster && (
-                    <span className="text-[10px] text-white/80">{photo.cluster}</span>
+                {photo.clusters && photo.clusters.length > 0 && (
+                    <span className="text-[10px] text-white/80">{photo.clusters.join(', ')}</span>
                 )}
                 {photo.location && (
                     <span className="text-[10px] text-white/80">{photo.location}</span>

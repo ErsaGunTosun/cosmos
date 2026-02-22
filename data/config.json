@@ -1,0 +1,10 @@
+{
+    "theme": "light",
+    "custom_colors": {
+        "background": "#252422",
+        "foreground": "#fffcf2",
+        "border": "#403d39",
+        "muted": "#ccc5b9"
+    },
+    "homepage_sort": "custom"
+}

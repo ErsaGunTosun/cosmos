@@ -71,7 +71,7 @@ export default function AdminClient({ profile: initialProfile }) {
                     <div className="relative">
                         <ProfileHeader profile={profile} elementCount={photos.length} />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-xs font-medium text-[var(--foreground)] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[var(--border)]">
+                            <span className="text-xs font-medium text-[var(--foreground)] bg-[var(--background)] shadow-sm px-3 py-1.5 rounded-full border border-[var(--border)]">
                                 Edit Profile
                             </span>
                         </div>
@@ -82,13 +82,19 @@ export default function AdminClient({ profile: initialProfile }) {
                 <div className="flex items-center justify-center gap-3 mb-6">
                     <button
                         onClick={() => setShowUpload(true)}
-                        className="px-4 py-2 text-sm font-medium text-white bg-[var(--foreground)] rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+                        className="px-4 py-2 text-sm font-medium text-[var(--background)] bg-[var(--foreground)] rounded-full hover:opacity-90 transition-opacity cursor-pointer"
                     >
                         + Add Photo
                     </button>
                     <a
+                        href="/admin/settings"
+                        className="px-4 py-2 text-sm font-medium text-[var(--muted)] border border-[var(--border)] rounded-full hover:bg-[var(--foreground)]/5 hover:text-[var(--foreground)] transition-colors"
+                    >
+                        Settings
+                    </a>
+                    <a
                         href="/"
-                        className="px-4 py-2 text-sm font-medium text-[var(--muted)] border border-[var(--border)] rounded-full hover:text-[var(--foreground)] transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-[var(--muted)] border border-[var(--border)] rounded-full hover:bg-[var(--foreground)]/5 hover:text-[var(--foreground)] transition-colors"
                     >
                         View Site
                     </a>

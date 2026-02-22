@@ -13,8 +13,10 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const file = formData.get('file');
-    const cluster = formData.get('cluster') || null;
+    const clustersStr = formData.get('clusters') || formData.get('cluster') || '';
+    const clusterNames = clustersStr ? clustersStr.split(',').map(s => s.trim()).filter(Boolean) : [];
     const location = formData.get('location') || null;
+    const description = formData.get('description') || null;
 
     if (!file) {
         return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -85,18 +87,6 @@ export async function POST(request) {
     const originalSrc = `/uploads/originals/${originalFileName}`;
 
     // 3. Veritabanına ekle
-    let clusterId = null;
-    if (cluster) {
-        // Kategori var mı kontrol et, yoksa ekle
-        const clRes = await pool.query('SELECT id FROM clusters WHERE name = $1', [cluster]);
-        if (clRes.rows.length > 0) {
-            clusterId = clRes.rows[0].id;
-        } else {
-            const newCl = await pool.query('INSERT INTO clusters (name) VALUES ($1) RETURNING id', [cluster]);
-            clusterId = newCl.rows[0].id;
-        }
-    }
-
     let locationId = null;
     if (location) {
         // Lokasyon var mı kontrol et, yoksa ekle
@@ -113,9 +103,23 @@ export async function POST(request) {
     const nextOrder = maxRows[0].next_order;
 
     const { rows } = await pool.query(
-        'INSERT INTO photos (src, original_src, cluster_id, location_id, sort_order, exif_data, blur_data) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-        [src, originalSrc, clusterId, locationId, nextOrder, exifData ? JSON.stringify(exifData) : null, blurData]
+        'INSERT INTO photos (src, original_src, location_id, sort_order, exif_data, blur_data, description) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+        [src, originalSrc, locationId, nextOrder, exifData ? JSON.stringify(exifData) : null, blurData, description]
     );
+    const photoId = rows[0].id;
 
-    return NextResponse.json({ id: rows[0].id, src, originalSrc });
+    // Kümeleri (clusters) kaydet
+    for (const cName of clusterNames) {
+        let cid = null;
+        const clRes = await pool.query('SELECT id FROM clusters WHERE name = $1', [cName]);
+        if (clRes.rows.length > 0) {
+            cid = clRes.rows[0].id;
+        } else {
+            const newCl = await pool.query('INSERT INTO clusters (name) VALUES ($1) RETURNING id', [cName]);
+            cid = newCl.rows[0].id;
+        }
+        await pool.query('INSERT INTO photo_clusters (photo_id, cluster_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [photoId, cid]);
+    }
+
+    return NextResponse.json({ id: photoId, src, originalSrc });
 }

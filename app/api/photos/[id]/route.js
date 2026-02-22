@@ -8,12 +8,17 @@ export async function GET(request, { params }) {
 
     const { rows } = await pool.query(`
         SELECT 
-            p.id, p.src, p.original_src, p.exif_data,
-            c.name as cluster, 
+            p.id, p.src, p.original_src, p.exif_data, p.description,
             l.name as location,
-            p.cluster_id, p.location_id
+            p.location_id,
+            COALESCE(
+                (SELECT json_agg(c.name) 
+                 FROM photo_clusters pc 
+                 JOIN clusters c ON pc.cluster_id = c.id 
+                 WHERE pc.photo_id = p.id), 
+                '[]'::json
+            ) as clusters
         FROM photos p
-        LEFT JOIN clusters c ON p.cluster_id = c.id
         LEFT JOIN locations l ON p.location_id = l.id
         ORDER BY p.sort_order ASC
     `);
@@ -37,18 +42,7 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params;
-    const { cluster, location } = await request.json();
-
-    let clusterId = null;
-    if (cluster) {
-        const clRes = await pool.query('SELECT id FROM clusters WHERE name = $1', [cluster]);
-        if (clRes.rows.length > 0) {
-            clusterId = clRes.rows[0].id;
-        } else {
-            const newCl = await pool.query('INSERT INTO clusters (name) VALUES ($1) RETURNING id', [cluster]);
-            clusterId = newCl.rows[0].id;
-        }
-    }
+    const { clusters, location, description } = await request.json();
 
     let locationId = null;
     if (location) {
@@ -62,9 +56,25 @@ export async function PUT(request, { params }) {
     }
 
     await pool.query(
-        'UPDATE photos SET cluster_id = $1, location_id = $2 WHERE id = $3',
-        [clusterId, locationId, Number(id)]
+        'UPDATE photos SET location_id = $1, description = $2 WHERE id = $3',
+        [locationId, description, Number(id)]
     );
+
+    // Photo clusters update
+    await pool.query('DELETE FROM photo_clusters WHERE photo_id = $1', [Number(id)]);
+    if (clusters && Array.isArray(clusters)) {
+        for (const cName of clusters) {
+            let cid = null;
+            const clRes = await pool.query('SELECT id FROM clusters WHERE name = $1', [cName]);
+            if (clRes.rows.length > 0) {
+                cid = clRes.rows[0].id;
+            } else {
+                const newCl = await pool.query('INSERT INTO clusters (name) VALUES ($1) RETURNING id', [cName]);
+                cid = newCl.rows[0].id;
+            }
+            await pool.query('INSERT INTO photo_clusters (photo_id, cluster_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [Number(id), cid]);
+        }
+    }
 
     return NextResponse.json({ success: true });
 }
