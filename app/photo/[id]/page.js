@@ -11,6 +11,7 @@ export default function PhotoDetail({ params }) {
     const [photo, setPhoto] = useState(null);
     const [imgLoaded, setImgLoaded] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
         setImgLoaded(false);
@@ -24,11 +25,17 @@ export default function PhotoDetail({ params }) {
             if (!photo) return;
             if (e.key === 'ArrowLeft' && photo.prev) router.push(`/photo/${photo.prev}`);
             if (e.key === 'ArrowRight' && photo.next) router.push(`/photo/${photo.next}`);
-            if (e.key === 'Escape') router.push('/');
+            if (e.key === 'Escape') {
+                if (isFullscreen) {
+                    setIsFullscreen(false);
+                } else {
+                    router.push('/');
+                }
+            }
         }
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
-    }, [photo, router]);
+    }, [photo, router, isFullscreen]);
 
     if (!photo) {
         return (
@@ -49,75 +56,94 @@ export default function PhotoDetail({ params }) {
             {/* Sol: Fotoğraf Alanı */}
             <div className="relative flex-1 w-full h-full flex flex-col">
                 {/* Mobile: Üst Header (Back + Info) */}
-                <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between lg:hidden pointer-events-none">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 text-sm text-[var(--foreground)] bg-[var(--background)]/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-auto border border-[var(--border)]"
-                    >
-                        ← Back
-                    </Link>
-                    <button
-                        onClick={() => setShowInfo(!showInfo)}
-                        className="p-2 text-[var(--foreground)] bg-[var(--background)]/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto border border-[var(--border)]"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </button>
-                </div>
+                {!isFullscreen && (
+                    <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between lg:hidden pointer-events-none">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center gap-2 text-sm text-[var(--foreground)] bg-[var(--background)]/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-auto border border-[var(--border)]"
+                        >
+                            ← Back
+                        </Link>
+                        <button
+                            onClick={() => setShowInfo(!showInfo)}
+                            className="p-2 text-[var(--foreground)] bg-[var(--background)]/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto border border-[var(--border)]"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
 
                 {/* Desktop: Back Link */}
-                <div className="hidden lg:block shrink-0 p-5 z-10">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back
-                    </Link>
-                </div>
+                {!isFullscreen && (
+                    <div className="hidden lg:block shrink-0 p-5 z-10">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Back
+                        </Link>
+                    </div>
+                )}
 
                 {/* Fotoğraf */}
-                <div className="flex-1 flex items-center justify-center min-h-0 px-4 lg:px-12 pb-4 lg:pb-4 pt-20 lg:pt-0 relative">
-                    <div className="relative w-full h-full max-w-5xl">
+                <div className={`flex-1 min-h-0 relative ${isFullscreen ? 'fixed inset-0 z-50 bg-[var(--background)]' : 'flex items-center justify-center px-4 lg:px-12 pb-4 lg:pb-4 pt-20 lg:pt-0'}`}>
+                    <div
+                        className={`relative w-full h-full cursor-zoom-in ${isFullscreen ? 'cursor-zoom-out p-4' : 'max-w-5xl'}`}
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                    >
                         {!imgLoaded && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-24 h-24 rounded-xl bg-gray-200 animate-pulse" />
+                                <div className="w-24 h-24 rounded-xl bg-[var(--border)] animate-pulse" />
                             </div>
                         )}
                         <Image
                             src={photo.original_src || photo.src}
                             alt="Photo"
                             fill
-                            className={`object-contain transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            className={`object-contain transition-all duration-500 ease-in-out drop-shadow-2xl ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                             priority
                             onLoad={() => setImgLoaded(true)}
                         />
                     </div>
+                    {isFullscreen && (
+                        <button
+                            className="absolute top-4 right-4 z-[60] p-2 text-white bg-black/50 hover:bg-black/80 rounded-full transition-colors"
+                            onClick={() => setIsFullscreen(false)}
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
 
                 {/* Navigasyon (Mobile & Desktop) */}
-                <div className="shrink-0 flex items-center justify-center gap-8 pb-8 lg:pb-5 z-10 relative">
-                    {photo.prev ? (
-                        <Link
-                            href={`/photo/${photo.prev}`}
-                            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors px-4 py-2"
-                        >
-                            ← Prev
-                        </Link>
-                    ) : <span className="text-sm text-transparent select-none px-4 py-2">← Prev</span>}
+                {!isFullscreen && (
+                    <div className="shrink-0 flex items-center justify-center gap-8 pb-8 lg:pb-5 z-10 relative">
+                        {photo.prev ? (
+                            <Link
+                                href={`/photo/${photo.prev}`}
+                                className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors px-4 py-2"
+                            >
+                                ← Prev
+                            </Link>
+                        ) : <span className="text-sm text-transparent select-none px-4 py-2">← Prev</span>}
 
-                    {photo.next ? (
-                        <Link
-                            href={`/photo/${photo.next}`}
-                            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors px-4 py-2"
-                        >
-                            Next →
-                        </Link>
-                    ) : <span className="text-sm text-transparent select-none px-4 py-2">Next →</span>}
-                </div>
+                        {photo.next ? (
+                            <Link
+                                href={`/photo/${photo.next}`}
+                                className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors px-4 py-2"
+                            >
+                                Next →
+                            </Link>
+                        ) : <span className="text-sm text-transparent select-none px-4 py-2">Next →</span>}
+                    </div>
+                )}
             </div>
 
             {/* Sağ: Sidebar / Mobile Bottom Sheet */}
@@ -140,6 +166,7 @@ export default function PhotoDetail({ params }) {
                     rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none
                     min-h-[50vh] max-h-[85vh] lg:min-h-0 lg:max-h-none overflow-y-auto
                     ${showInfo ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+                    ${isFullscreen ? 'hidden' : ''}
                 `}>
                     {/* Mobile Pull Indicator */}
                     <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-2 lg:hidden" />
