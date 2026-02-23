@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useDrag } from '@use-gesture/react';
 
 export default function PhotoDetail({ params }) {
     const { id } = use(params);
@@ -12,19 +14,32 @@ export default function PhotoDetail({ params }) {
     const [imgLoaded, setImgLoaded] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [slideDirection, setSlideDirection] = useState(0);
+
+    const [[page, direction], setPage] = useState([0, 0]);
 
     useEffect(() => {
         setImgLoaded(false);
         fetch(`/api/photos/${id}`)
             .then(res => res.json())
-            .then(data => setPhoto(data));
+            .then(data => {
+                setPhoto(data);
+                // Reset slide direction on new photo load 
+                setSlideDirection(0);
+            });
     }, [id]);
 
     useEffect(() => {
         function handleKey(e) {
             if (!photo) return;
-            if (e.key === 'ArrowLeft' && photo.prev) router.push(`/photo/${photo.prev}`);
-            if (e.key === 'ArrowRight' && photo.next) router.push(`/photo/${photo.next}`);
+            if (e.key === 'ArrowLeft' && photo.prev) {
+                setSlideDirection(-1);
+                router.push(`/photo/${photo.prev}`);
+            }
+            if (e.key === 'ArrowRight' && photo.next) {
+                setSlideDirection(1);
+                router.push(`/photo/${photo.next}`);
+            }
             if (e.key === 'Escape') {
                 if (isFullscreen) {
                     setIsFullscreen(false);
@@ -36,6 +51,57 @@ export default function PhotoDetail({ params }) {
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
     }, [photo, router, isFullscreen]);
+
+    const SWIPE_CONFIDENCE_THRESHOLD = 10000;
+    const swipePower = (offset, velocity) => {
+        return Math.abs(offset) * velocity;
+    };
+
+    const variants = {
+        enter: (direction) => {
+            return {
+                x: direction > 0 ? 1000 : -1000,
+                opacity: 0
+            };
+        },
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1
+        },
+        exit: (direction) => {
+            return {
+                zIndex: 0,
+                x: direction < 0 ? 1000 : -1000,
+                opacity: 0
+            };
+        }
+    };
+
+    const bind = useDrag(({ active, movement: [mx, my], velocity: [vx, vy], direction: [dx, dy], cancel }) => {
+        if (!photo || isFullscreen) return; // Disable swipe in fullscreen for now
+
+        // If drag is finished
+        if (!active) {
+            const swipe = swipePower(mx, vx);
+            if (swipe > SWIPE_CONFIDENCE_THRESHOLD || mx < -75) {
+                if (photo.next) {
+                    setSlideDirection(1);
+                    router.push(`/photo/${photo.next}`);
+                }
+            } else if (swipe > SWIPE_CONFIDENCE_THRESHOLD || mx > 75) {
+                if (photo.prev) {
+                    setSlideDirection(-1);
+                    router.push(`/photo/${photo.prev}`);
+                }
+            }
+        }
+    }, {
+        axis: 'x', // Only track horizontal movement
+        filterTaps: true,
+        bounds: { left: photo?.next ? -1000 : 0, right: photo?.prev ? 1000 : 0 },
+        rubberband: true
+    });
 
     if (!photo) {
         return (
@@ -91,25 +157,49 @@ export default function PhotoDetail({ params }) {
                 )}
 
                 {/* Fotoğraf */}
-                <div className={`flex-1 min-h-0 relative ${isFullscreen ? 'fixed inset-0 z-50 bg-[var(--background)]' : 'flex items-center justify-center px-4 lg:px-12 pb-4 lg:pb-4 pt-20 lg:pt-0'}`}>
-                    <div
-                        className={`relative w-full h-full cursor-zoom-in ${isFullscreen ? 'cursor-zoom-out p-4' : 'max-w-5xl'}`}
-                        onClick={() => setIsFullscreen(!isFullscreen)}
-                    >
-                        {!imgLoaded && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-24 h-24 rounded-xl bg-[var(--border)] animate-pulse" />
-                            </div>
-                        )}
-                        <Image
-                            src={photo.original_src || photo.src}
-                            alt="Photo"
-                            fill
-                            className={`object-contain transition-all duration-500 ease-in-out drop-shadow-2xl ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            priority
-                            onLoad={() => setImgLoaded(true)}
-                        />
-                    </div>
+                <div className={`flex-1 min-h-0 relative overflow-hidden touch-pan-y ${isFullscreen ? 'fixed inset-0 z-50 bg-[var(--background)]' : 'flex items-center justify-center px-4 lg:px-12 pb-4 lg:pb-4 pt-20 lg:pt-0'}`}>
+                    <AnimatePresence initial={false} custom={slideDirection}>
+                        <motion.div
+                            key={photo.id}
+                            custom={slideDirection}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{
+                                x: { type: "spring", stiffness: 300, damping: 30 },
+                                opacity: { duration: 0.2 }
+                            }}
+                            {...bind()}
+                            className={`relative w-full h-full cursor-zoom-in ${isFullscreen ? 'cursor-zoom-out p-4' : 'max-w-5xl touch-none'}`}
+                            style={{
+                                touchAction: isFullscreen ? 'auto' : 'pan-y' // Allow vertical scroll, hijack horizontal for swipe 
+                            }}
+                            onClick={(e) => {
+                                // Prevent fullscreen toggle if we were swiping
+                                if (!isFullscreen) {
+                                    setIsFullscreen(true);
+                                } else {
+                                    setIsFullscreen(false);
+                                }
+                            }}
+                        >
+                            {!imgLoaded && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-24 h-24 rounded-xl bg-[var(--border)] animate-pulse" />
+                                </div>
+                            )}
+                            <Image
+                                src={photo.original_src || photo.src}
+                                alt="Photo"
+                                fill
+                                draggable={false}
+                                className={`object-contain transition-all duration-500 ease-in-out drop-shadow-2xl ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                                priority
+                                onLoad={() => setImgLoaded(true)}
+                            />
+                        </motion.div>
+                    </AnimatePresence>
                     {isFullscreen && (
                         <button
                             className="absolute top-4 right-4 z-[60] p-2 text-white bg-black/50 hover:bg-black/80 rounded-full transition-colors"
