@@ -16,6 +16,7 @@ import {
 import AdminPhotoCard from './AdminPhotoCard';
 import Container from '../layout/Container';
 import Image from 'next/image';
+import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 export default function AdminPhotoGrid({ photos, onReorder, onEdit }) {
     const [activeId, setActiveId] = useState(null);
@@ -55,16 +56,19 @@ export default function AdminPhotoGrid({ photos, onReorder, onEdit }) {
                 onDragEnd={handleDragEnd}
             >
                 <SortableContext items={photos.map(p => p.id)} strategy={rectSortingStrategy}>
-                    <div className="columns-2 sm:columns-3 lg:columns-4 gap-5 [&>*]:mb-5">
-                        {photos.map((photo) => (
-                            <AdminPhotoCard
-                                key={photo.id}
-                                photo={photo}
-                                isDragging={photo.id === activeId}
-                                onEdit={() => onEdit(photo)}
-                            />
-                        ))}
-                    </div>
+                    <ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 640: 3, 1024: 4 }}>
+                        <Masonry gutter="20px">
+                            {photos.map((photo) => (
+                                <div key={photo.id} className="mb-5">
+                                    <AdminPhotoCard
+                                        photo={photo}
+                                        isDragging={photo.id === activeId}
+                                        onEdit={() => onEdit(photo)}
+                                    />
+                                </div>
+                            ))}
+                        </Masonry>
+                    </ResponsiveMasonry>
                 </SortableContext>
 
                 <DragOverlay adjustScale={false}>

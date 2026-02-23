@@ -13,11 +13,16 @@ function getConfig() {
     }
 }
 
-// GET: Fotoğrafları sıralı getir (public)
-export async function GET() {
+// GET: Fotoğrafları sıralı getir (public) - Supports optional ?page=1&limit=24
+export async function GET(request) {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page'));
+    const limit = parseInt(searchParams.get('limit'));
+
     const config = getConfig();
     const orderBy = config.homepage_sort === 'date' ? 'ORDER BY p.created_at DESC' : 'ORDER BY p.sort_order ASC';
-    const { rows } = await pool.query(`
+
+    let query = `
         SELECT 
             p.id, p.src, p.blur_data, 
             l.name as location,
@@ -32,7 +37,16 @@ export async function GET() {
         FROM photos p
         LEFT JOIN locations l ON p.location_id = l.id
         ${orderBy}
-    `);
+    `;
+
+    const values = [];
+    if (!isNaN(page) && !isNaN(limit) && page > 0 && limit > 0) {
+        const offset = (page - 1) * limit;
+        query += ` LIMIT $1 OFFSET $2`;
+        values.push(limit, offset);
+    }
+
+    const { rows } = await pool.query(query, values);
     return NextResponse.json(rows);
 }
 

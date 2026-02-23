@@ -20,6 +20,7 @@ import {
 import PhotoCard from './PhotoCard';
 import Container from '../layout/Container';
 import Image from 'next/image';
+import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 export default function PhotoGrid({ photos, onReorder, readonly = false }) {
     const dndId = useId();
@@ -60,11 +61,15 @@ export default function PhotoGrid({ photos, onReorder, readonly = false }) {
     if (readonly) {
         return (
             <Container className="pb-12">
-                <div className="columns-2 sm:columns-3 lg:columns-4 gap-5 [&>*]:mb-5">
-                    {photos.map((photo) => (
-                        <PhotoCard key={photo.id} photo={photo} readonly />
-                    ))}
-                </div>
+                <ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 640: 3, 1024: 4 }}>
+                    <Masonry gutter="20px">
+                        {photos.map((photo) => (
+                            <div key={photo.id} className="mb-5">
+                                <PhotoCard photo={photo} readonly />
+                            </div>
+                        ))}
+                    </Masonry>
+                </ResponsiveMasonry>
             </Container>
         );
     }
@@ -79,15 +84,18 @@ export default function PhotoGrid({ photos, onReorder, readonly = false }) {
                 onDragEnd={handleDragEnd}
             >
                 <SortableContext items={photos.map(p => p.id)} strategy={rectSortingStrategy}>
-                    <div className="columns-2 sm:columns-3 lg:columns-4 gap-5 [&>*]:mb-5">
-                        {photos.map((photo) => (
-                            <PhotoCard
-                                key={photo.id}
-                                photo={photo}
-                                isDragging={photo.id === activeId}
-                            />
-                        ))}
-                    </div>
+                    <ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 640: 3, 1024: 4 }}>
+                        <Masonry gutter="20px">
+                            {photos.map((photo) => (
+                                <div key={photo.id} className="mb-5">
+                                    <PhotoCard
+                                        photo={photo}
+                                        isDragging={photo.id === activeId}
+                                    />
+                                </div>
+                            ))}
+                        </Masonry>
+                    </ResponsiveMasonry>
                 </SortableContext>
 
                 <DragOverlay adjustScale={false}>
