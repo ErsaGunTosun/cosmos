@@ -52,10 +52,10 @@ export async function POST(request) {
         // EXIF yoksa sorun değil
     }
 
-    // Blur placeholder oluştur (10px, base64)
     let blurData = null;
     try {
         const blurBuffer = await sharp(buffer)
+            .rotate()
             .resize(10, null, { withoutEnlargement: true })
             .webp({ quality: 20 })
             .toBuffer();
@@ -79,6 +79,7 @@ export async function POST(request) {
     await mkdir(thumbnailsDir, { recursive: true });
     const thumbFileName = `${baseName}.webp`;
     await sharp(buffer)
+        .rotate()
         .resize(800, null, { withoutEnlargement: true })
         .webp({ quality: 80 })
         .toFile(path.join(thumbnailsDir, thumbFileName));
