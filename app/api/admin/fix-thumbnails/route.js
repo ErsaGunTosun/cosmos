@@ -24,7 +24,10 @@ export async function GET(request) {
                 const buffer = await readFile(originalFilePath);
 
                 // Re-generate webp thumbnail with .rotate() 
-                const thumbFilePath = path.join(process.cwd(), 'public', photo.src);
+                const timestamp = Date.now();
+                const newFileName = `${path.basename(photo.src, '.webp')}_${timestamp}.webp`;
+                const thumbFilePath = path.join(process.cwd(), 'public', 'uploads', 'thumbnails', newFileName);
+
                 await sharp(buffer)
                     .rotate() // <--- The magic fix
                     .resize(800, null, { withoutEnlargement: true })
@@ -39,9 +42,10 @@ export async function GET(request) {
                     .toBuffer();
 
                 const blurData = `data:image/webp;base64,${blurBuffer.toString('base64')}`;
+                const newSrc = `/uploads/thumbnails/${newFileName}`;
 
-                // Update DB with the fixed blur_data
-                await pool.query('UPDATE photos SET blur_data = $1 WHERE id = $2', [blurData, photo.id]);
+                // Update DB with the fixed blur_data and new URL to bust cache
+                await pool.query('UPDATE photos SET blur_data = $1, src = $2 WHERE id = $3', [blurData, newSrc, photo.id]);
 
                 fixedCount++;
             } catch (err) {
